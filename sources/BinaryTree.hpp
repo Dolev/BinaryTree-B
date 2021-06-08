@@ -3,7 +3,7 @@
 #include <vector>
 // using this site : https://www.cs.odu.edu/~zeil/cs361/latest/Public/treetraversal/index.html
 //  using this site : https://caiorss.github.io/C-Cpp-Notes/STL%20Iterators%20and%20Algorithms.html
-using namespace std;
+//using namespace std;
 
 namespace ariel {
 
@@ -17,6 +17,18 @@ namespace ariel {
 			Node* left = nullptr;
 			Node* right = nullptr;
 			Node* parent = nullptr;
+
+			Node(const T x) : parent(nullptr), left(nullptr), right(nullptr), data(x) {}
+            ~Node() {
+				if (left) {delete left;};
+				if (right) {delete right;};
+			} // recursive
+			void setData(const T& temp) {
+				data = temp;
+			}
+			T getData() {
+				return this->data;
+			}
             //          fixxing code for make tidy
             Node(const Node& other){
             }
@@ -30,18 +42,6 @@ namespace ariel {
                   return *this;
             }
             //
-           
-			Node(const T x) : parent(nullptr), left(nullptr), right(nullptr), data(x) {}
-            ~Node() {
-				if (left) {delete left;};
-				if (right) {delete right;};
-			} // recursive
-			void setData(const T& temp) {
-				data = temp;
-			}
-			T getData() {
-				return this->data;
-			}
 		};
 
 		Node* root;
@@ -75,7 +75,7 @@ namespace ariel {
 				}
 			}
 			else {
-				throw invalid_argument("Value dosen't exists");
+				throw std::invalid_argument("Value dosen't exists");
 			}
 			return *this;
 		}
@@ -92,7 +92,7 @@ namespace ariel {
 				}
 			}
 			else {
-				throw invalid_argument("Value dosen't exists");
+				throw std::invalid_argument("Value dosen't exists");
 			}
 			return *this;
 		}
@@ -118,7 +118,7 @@ namespace ariel {
 
 		class PreorderIterator {				//        subclass Preorder Iterator
 		private:									//         (parent - left  - right)
-			vector <Node*> preVector;
+			std::vector <Node*> preVector;
 			size_t preVectorIndex = 0;
 
 		public:
@@ -138,7 +138,8 @@ namespace ariel {
 				fillVector(node->left);
 				fillVector(node->right);
 			}
-			~PreorderIterator(){}
+			
+            
 
 			bool operator != (const PreorderIterator& other) { //  Done
 				return preVector.at(preVectorIndex) != other.preVector.at(other.preVectorIndex);
@@ -168,13 +169,12 @@ namespace ariel {
 				preVectorIndex++;
 				return saverPreInstance;
 			}  
-                 
 		};
 
 /*---------------------------------------------------------------------------------------------------------*/
 		class InorderIterator {						//        subclass Inorder Iterator
 		  private:									//     ( left - parent - right)
-			vector <Node*> helperVector;
+			std::vector <Node*> helperVector;
 			size_t currentVectorIndex = 0;
 		  public:
 			InorderIterator(Node* node = nullptr) {
@@ -193,11 +193,9 @@ namespace ariel {
 				fillVector(node->left);
 				helperVector.push_back(node);
 				fillVector(node->right);
-			}
-
-			~InorderIterator() {}
-
-			bool operator != (const InorderIterator& other) { //  Done
+			}            
+			
+            bool operator != (const InorderIterator& other) { //  Done
 				return helperVector.at(currentVectorIndex) != other.helperVector.at(other.currentVectorIndex);
 			}
 			// comparison operators. just compare node pointers
@@ -231,7 +229,7 @@ namespace ariel {
 /*---------------------------------------------------------------------------------------------------------*/
 		class PostorderIterator { //       subclass Postorder Iterator
 		private: //      (left  - right - parent)
-			vector <Node*> postVector;
+			std::vector <Node*> postVector;
 			size_t posVectorIndex = 0;
 			
 		public:
@@ -252,8 +250,8 @@ namespace ariel {
 				fillVector(node->right);
 				postVector.push_back(node);
 			}
-			~PostorderIterator() {}
-
+			
+            
 			bool operator != (const PostorderIterator& other) {
 				return postVector.at(posVectorIndex) != other.postVector.at(other.posVectorIndex);
 			}
@@ -286,49 +284,42 @@ namespace ariel {
 /*---------------------------------------------------------------------------------------------------------*/
 	
         BinaryTree& operator=(BinaryTree&& second) noexcept {
-            // if (root)
-            // {
-            //      delete root;
-            // }
             this->root  = second.root;
-            // bt.root = nullptr;
+            
             return *this;
         }
-        BinaryTree& operator=(const BinaryTree &second) {
-            //check if equals to it-self
-            if (this == &second) {
-                return *this;
-            }
-            // check if root from other tree is not nullptr
-            // so that it won't try to access invalid memory
-            if(second.root) {           // if second.root!=nullptr
+        BinaryTree& operator=(const BinaryTree& second) {
+            
+            if ( &second==this  ) {           }
+           // check if root from other tree is not nullptr so that it won't try to access invalid memory
+            if(second.root) {           // if second.root!=nullptr ->
                 root = new Node{second.root->data};
-                copy_ctor(root, second.root);
-            }
+                CopyConstructor(root, second.root);
+                }
+            
             return *this;
         }
 
+//throw invalid_argument("Other tree root is empty ");
         BinaryTree(const BinaryTree& second) {
             if(second.root){
                 this->root = new Node(second.root->data);
-                copy_ctor(root,second.root);
+                CopyConstructor(root,second.root);
             }
         }
 
-        void copy_ctor(Node* src, const Node* dist) {
+        void CopyConstructor(Node* src, const Node* dist) {
             if(dist->left){
                 src->left = new Node(dist->left->data);
-                copy_ctor(src->left, dist->left);
+                CopyConstructor(src->left, dist->left);
             }
             if(dist->right){
                 src->right = new Node(dist->right->data);
-                copy_ctor(src->right, dist->right);
+                CopyConstructor(src->right, dist->right);
             }
         }
 
-
-    
-        BinaryTree(BinaryTree &&second)  noexcept {
+        BinaryTree(BinaryTree &&second)  noexcept {     //  return true if potential exceptions - כלומר לא זורק חריגה
                 this->root = second.root;
                 second.root = nullptr;
         }
@@ -371,7 +362,7 @@ namespace ariel {
 		}
 
 		friend std::ostream& operator << (std::ostream& Output, const BinaryTree& binaryTree) {
-			Output << "My BinaryTree is : " << endl; //// will want to recieve the tree
+			Output << "My BinaryTree is : " << std::endl; //// will want to recieve the tree
 			return Output;
 		};
 	};
